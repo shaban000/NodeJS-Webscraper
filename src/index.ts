@@ -1,17 +1,37 @@
 import express, { Application } from "express";
 import axios from 'axios'
-import * as Controller from "./controller";
+import { Article } from "./model";
+import { WebscrapeController } from "./controller";
 
 const app: Application = express();
 const port: string = '5000' || process.env.PORT; // default port to listen
 const baseUrl = 'https://www.nu.nl';
+const controller = new WebscrapeController();
 
 const getArticlesFromUrl = ( res: any, url: string ) => {
   axios.get( url )
-    .then( async webRes => {
-      await Controller.getData( webRes.data, baseUrl )
-        .then( articles => {
-          res.status(200).send( articles );
+    .then( async MainPageResponse => {
+
+      const hrefs: string[] = controller.getAllArticleHrefs( MainPageResponse.data );
+      if ( hrefs.length ===  0 ) res.status(500).send( 'This page does not contain any articles.' )
+
+      const requests: Promise<any>[] = [];
+      hrefs.forEach( href => {
+        const request: Promise<any> = axios.get( url.concat( href ));
+        requests.push(request);
+      })
+
+      const allArticles: Article[] = [];
+      await axios.all( requests )
+        .then( responses => {
+          responses.forEach( articleResponse => {
+            if (res.status === 200){
+              const article: Article = controller.getArticleData( articleResponse.data, articleResponse.config.url );
+              allArticles.push( article );
+            }
+            if ( allArticles.length > 0 ) res.status(200).send( allArticles );
+            else res.status(500).send( 'None of article could be scraped for data XD' );
+          } )
         } ).catch(() => {
           res.status(404).send( `Articles could not be gathered` );
         } )

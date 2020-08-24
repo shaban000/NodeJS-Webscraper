@@ -1,16 +1,17 @@
-import { WebscrapeController } from '../src/controller'
-import { Article } from "../src/model";
+import { NuController } from '../src/controllers/NuController'
+import { Article } from "../src/models/Article";
 
-const subject = new WebscrapeController();
+const subject = new NuController();
 
 test('test_testing', () => {
   expect(true ).toBe(true );
+
 })
 
 test( 'test_getAllArticleHrefs_oneArticleHtml', () => {
   // Arrange
-  const html = '<div><li class="list__item list__item--thumb" ><a' +
-    ' href="/champions-league/6072746/psg-en-bayern-missen-grote-kansen-in-eerste-helft.html"></a></li></div>'
+  const html = `<div><li class="list__item list__item--thumb" >
+    <a href="/champions-league/6072746/psg-en-bayern-missen-grote-kansen-in-eerste-helft.html"></a></li></div>`
 
   // Act
   const hrefs: string[] = subject.getAllArticleHrefs( html );

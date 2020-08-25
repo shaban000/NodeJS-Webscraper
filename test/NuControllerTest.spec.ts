@@ -3,21 +3,29 @@ import { Article } from "../src/models/Article";
 
 const subject = new NuController();
 
-test('test_testing', () => {
-  expect(true ).toBe(true );
-
-})
-
-test( 'test_getAllArticleHrefs_oneArticleHtml', () => {
+test( 'test_getAllArticleHrefs_OneHeadlineOneBasic', () => {
   // Arrange
-  const html = `<div><li class="list__item list__item--thumb" >
-    <a href="/champions-league/6072746/psg-en-bayern-missen-grote-kansen-in-eerste-helft.html"></a></li></div>`
+  const html = `<div><lic class="block headline"><a href="/one"></a></lic><li class="list__item list__item--thumb" >
+    <a href="/two"></a></li></div>`
 
   // Act
   const hrefs: string[] = subject.getAllArticleHrefs( html );
 
   // Assert
-  expect( hrefs.length ).toBe( 1 );
+  expect( hrefs.length ).toBe( 2 );
+
+} )
+
+test( 'test_getAllArticleHrefs_noneArticles', () => {
+  // Arrange
+  const html = `<div><lic class="block headline"><a class="block-title" href="/one"></a></lic><li class="list__item list__item--thumb" >
+    <a href="/two"><label class="item-title__label"></label></a></li></div>`
+
+  // Act
+  const hrefs: string[] = subject.getAllArticleHrefs( html );
+
+  // Assert
+  expect( hrefs.length ).toBe( 0 );
 
 } )
 
@@ -39,3 +47,4 @@ test( 'test_getArticleData', () => {
   expect( article.description ).toBe( description );
   expect( article.paragraphs[0] ).toBe( paragraphs[0] );
 } )
+

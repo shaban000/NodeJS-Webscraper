@@ -43,7 +43,7 @@ router.get('/', (req: Request, res: Response ) => {
   getArticlesFromUrl( res , baseUrl );
 });
 
-router.get('/dir/:dir', ( req: Request, res: Response ) => {
+router.get('/:dir', ( req: Request, res: Response ) => {
   const directory: string = req.params.dir;
   const url = baseUrl.concat( '/' ).concat( directory )
   getArticlesFromUrl( res, url );

@@ -5,12 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "tsc",
+    "build": "tsoa spec-and-routes && tsc",
     "prestart": "npm run build",
     "start": "nodemon .",
     "test": "jest",
     "test:watch": "jest --watch",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "generate": "tsoa spec-and-routes"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +19,9 @@
   "dependencies": {
     "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "swagger-ui-express": "^4.1.4",
+    "tsoa": "^3.2.1"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.21",
@@ -26,6 +29,7 @@
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.0",
     "@types/supertest": "^2.0.10",
+    "@types/swagger-ui-express": "^4.1.2",
     "jest": "^26.4.2",
     "nodemon": "^2.0.4",
     "supertest": "^4.0.2",

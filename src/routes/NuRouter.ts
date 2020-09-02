@@ -1,52 +1,67 @@
-import { Router, Request, Response } from 'express';
-import { NuController } from "../controllers/NuController";
+import {Controller, Get, Route, SuccessResponse, Response, Res, Path, TsoaResponse, Post} from "tsoa";
 import { Article } from "../models/Article";
-import axios from "axios";
+import { NuService } from "../services/NuService";
+import axios from 'axios';
 
-const router: Router = Router();
-const baseUrl = 'https://www.nu.nl';
-const controller = new NuController();
+@Route( 'api/nu/' )
+export class NuRouter extends Controller {
 
-const getArticlesFromUrl = ( res: Response, url: string ) => {
-  axios.get( url )
-    .then( async MainPageResponse => {
-      const hrefs: string[] = controller.getAllArticleHrefs( MainPageResponse.data );
-      if (hrefs.length === 0) return res.status( 500 ).send( 'This page does not contain any articles.' )
-      const requests: Promise<any>[] = [];
-      hrefs.forEach( href => {
-        const request: Promise<any> = axios.get( baseUrl.concat( href ));
-        requests.push(request);
-      })
+  private baseUrl = 'https://www.nu.nl';
+  private service = new NuService();
 
-      await axios.all( requests )
-        .then( responses => {
-          const allArticles: Article[] = [];
-          responses.forEach( articleResponse => {
-            if (articleResponse.status === 200){
-              const article: Article = controller.getArticleData( articleResponse.data, articleResponse.config.url );
-              allArticles.push( article );
-            }
+  private async getArticles(url: string,
+                            error404: TsoaResponse<404, { message: string }>,
+                            error500: TsoaResponse<500, { message: string }>): Promise<Article[]> {
+    let allArticles: Article[] = null;
+    await axios.get(url)
+      .then(async MainPageResponse => {
+        const hrefs: string[] = this.service.getAllArticleHrefs(MainPageResponse.data);
+        if (hrefs.length > 0) {
+          const requests: Promise<any>[] = [];
+          hrefs.forEach(href => {
+            const request: Promise<any> = axios.get(this.baseUrl.concat(href));
+            requests.push(request);
           })
-          if ( allArticles.length > 0 ) res.status(200).send( allArticles );
-          else res.status(500).send( `None of article could be scraped for data XD, ${ allArticles }`  );
-        })
-        .catch((err) => {
-          res.status(404).send( `Articles could not be gathered. Error Message: ${ err.message }` );
-        })
-    })
-    .catch(() => {
-      res.status( 500 ).send( `Could not retrieve a response from ${ url }, This might be an invalid url or the server is currently unreachable.` );
-    })
+          await axios.all(requests)
+            .then(responses => {
+              allArticles = [];
+              responses.forEach(articleResponse => {
+                if (articleResponse.status === 200) {
+                  const article: Article = this.service.getArticleData(articleResponse.data, articleResponse.config.url);
+                  allArticles.push(article);
+                }
+              })
+              if (allArticles.length > 0) return allArticles;
+              else error404(404, {message: `None of article could be scraped for data XD`})
+            })
+            .catch((err) => {
+              error404(404, {message: `Articles could not be gathered. Error Message: ${err.message}`})
+            })
+        } else error500(500, {message: '${ url } did not contain any articles for webscraping.'})
+      })
+      .catch(() => {
+        error500(500, {message: `Could not retrieve a response from ${url}, This might be an invalid url or the server is currently unreachable.`})
+      })
+    return allArticles;
+  }
+
+  @Get()
+  @SuccessResponse('200', 'Successful')
+  @Response('404', 'No articles could be found')
+  @Response('500', 'Not found')
+  public async nuMain(@Res() error404: TsoaResponse<404, { message: string }>,
+                    @Res() error500: TsoaResponse<500, { message: string }>): Promise<Article[]> {
+    return await this.getArticles( this.baseUrl, error404, error500 );
+  }
+
+  @Get('{dir}')
+  @SuccessResponse('200', 'Successful')
+  @Response('404', 'No articles could be found')
+  @Response('500', 'Not found')
+  public async nuDirectory(@Path() dir: string,
+                         @Res() error404: TsoaResponse<404, { message: string }>,
+                         @Res() error500: TsoaResponse<500, { message: string }>): Promise<Article[]> {
+    const url = this.baseUrl.concat( '/' ).concat( dir )
+    return await this.getArticles( url, error404, error500 );
+  }
 }
-
-router.get('/', (req: Request, res: Response ) => {
-  getArticlesFromUrl( res , baseUrl );
-});
-
-router.get('/:dir', ( req: Request, res: Response ) => {
-  const directory: string = req.params.dir;
-  const url = baseUrl.concat( '/' ).concat( directory )
-  getArticlesFromUrl( res, url );
-});
-
-export const NuRouter: Router = router;

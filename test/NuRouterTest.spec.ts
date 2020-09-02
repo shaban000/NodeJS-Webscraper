@@ -14,14 +14,6 @@ beforeEach( () => {
 afterEach( () => {
   axiosMock = null;
 } );
-test('test_apiDoc', async () => {
-  // Act
-  const response = await request.get('/api')
-
-  // Assert
-  expect(response.status).toBe(200)
-})
-
 
 test('test_baseUrl_catch_axiosGet', async () => {
   // Arrange
@@ -62,7 +54,6 @@ test('test_baseUrl_catch_axiosAll', async () => {
 
 test('test_baseUrl_error_scraping', async () => {
   // Arrange
-  const url = "/test";
   const title = 'Test for getArticleData methode.';
   const description = 'Converting HTML Article to Article Model.';
   const paragraphs = [ 'paragraph 1' ];
@@ -78,12 +69,11 @@ test('test_baseUrl_error_scraping', async () => {
   const response = await request.get( '/api/nu' );
 
   // Assert
-  expect( response.status ).toBe( 500 );
+  expect( response.status ).toBe( 404 );
 })
 
 test('test_baseUrl_success', async () => {
   // Arrange
-  const link = "/test";
   const title = 'Test for getArticleData methode.';
   const description = 'Converting HTML Article to Article Model.';
   const paragraphs = [ 'paragraph 1' ];
@@ -93,7 +83,7 @@ test('test_baseUrl_success', async () => {
 
   // Act
   axiosMock.get.mockResolvedValue( { data: html } );
-  axiosMock.all.mockResolvedValue( [{ data: articleHtml, status:200, config: { url: link } }] )
+  axiosMock.all.mockResolvedValue( [{ data: articleHtml, status:200, config: { url: "/routerTest" } }] )
   const response = await request.get( '/api/nu' );
 
   // Assert
@@ -102,7 +92,6 @@ test('test_baseUrl_success', async () => {
 
 test('test_directory_success', async () => {
   // Arrange
-  const link = "/test";
   const title = 'Test for getArticleData methode.';
   const description = 'Converting HTML Article to Article Model.';
   const paragraphs = [ 'paragraph 1' ];
@@ -112,7 +101,7 @@ test('test_directory_success', async () => {
 
   // Act
   axiosMock.get.mockResolvedValue( { data: html } );
-  axiosMock.all.mockResolvedValue( [{ data: articleHtml, status:200, config: { url: link } }] )
+  axiosMock.all.mockResolvedValue( [{ data: articleHtml, status:200, config: { url: "/routerTest" } }] )
   const response = await request.get( '/api/nu/tech' );
 
   // Assert

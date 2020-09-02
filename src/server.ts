@@ -1,12 +1,15 @@
-import express, { Application, Request, Response } from "express";
-import { NuRouter } from "./routes/NuRouter";
+import express, { Application } from "express";
+import { serve, setup } from "swagger-ui-express";
+import { RegisterRoutes } from "../build/routes";
+import * as swaggerDocument from '../build/swagger.json';
 
-const app: Application = express();
+const app = express();
 
-// TODO Route handler for API documentation
-app.get( "/api", ( req: Request, res: Response ) => {
-  res.status(200).send( "Ewa harde werker" );
-} );
+RegisterRoutes( app );
 
-app.use( '/api/nu', NuRouter );
+/**
+ * This endpoint is for the Swagger API documentation.
+ */
+app.use('/api', serve, setup( swaggerDocument ));
+
 export const App: Application = app;

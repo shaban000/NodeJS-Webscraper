@@ -1,7 +1,7 @@
 import { Article } from "../models/Article";
 import cheerio from "cheerio";
 
-export class NuController {
+export class NuService {
 
   private _headlinesSelector: string = '.block.headline a';
   private _articlesSelector: string = '.list__item--thumb a';

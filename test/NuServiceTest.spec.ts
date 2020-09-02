@@ -1,7 +1,7 @@
-import { NuController } from '../src/controllers/NuController'
+import { NuService } from '../src/services/NuService'
 import { Article } from "../src/models/Article";
 
-const subject = new NuController();
+const subject = new NuService();
 
 test( 'test_getAllArticleHrefs_OneHeadlineOneBasic', () => {
   // Arrange
